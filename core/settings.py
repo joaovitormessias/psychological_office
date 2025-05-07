@@ -95,6 +95,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# This will tell Django to use the custom user model for authentication.
+AUTH_USER_MODEL = 'psychological_office.User'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
