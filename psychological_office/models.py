@@ -39,7 +39,7 @@ class Appointment(models.Model):
     status = models.CharField(max_length=20, choices=[('Schuduled','Schuduled'), ('Cancelled','Cancelled')])
 
     def __str__(self):
-        return self.patient
+        return self.patient.patient_name
 
 class Consultation(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
