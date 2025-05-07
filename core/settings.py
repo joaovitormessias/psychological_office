@@ -32,6 +32,9 @@ INSTALLED_APPS = [
     # Back-end: Django Rest
     'rest_framework',
 
+    # Authentication with SimpleJWT
+    'rest_framework_simplejwt',
+
     # Registring the App
     'psychological_office',
 ]
