@@ -35,6 +35,9 @@ INSTALLED_APPS = [
     # Authentication with SimpleJWT
     'rest_framework_simplejwt',
 
+    # Documentation
+    'drf_spectacular',
+
     # Registring the App
     'psychological_office',
 ]
