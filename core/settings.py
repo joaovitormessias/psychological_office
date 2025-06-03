@@ -2,6 +2,8 @@ import os
 import sys
 from django.core.management.utils import get_random_secret_key
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', get_random_secret_key())
+SECRET_KEY = config('DJANGO_SECRET_KEY', default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,20 +93,20 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'your_db_name'),
-        'USER': os.getenv('DB_USER', 'your_db_user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'your_db_password'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
 
 # Use SQLite in-memory for tests
-if 'test' in sys.argv or 'test_coverage' in sys.argv:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
-    }
+# if 'test' in sys.argv or 'test_coverage' in sys.argv:
+#     DATABASES['default'] = {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': ':memory:',
+#     }
 
 
 # Password validation
@@ -165,5 +167,5 @@ REST_FRAMEWORK = {
 # Fernet key for encrypting consultation data
 # IMPORTANT: DJANGO_FERNET_KEY environment variable MUST be set in production.
 DEFAULT_FERNET_KEY_BYTES = 'DoDOnwOMoURGhGUfE87fgBEtXgLo6ObG84l_us9fGT4=' # generate_key() output is str
-FERNET_KEY = os.getenv('DJANGO_FERNET_KEY', DEFAULT_FERNET_KEY_BYTES)
+FERNET_KEY = config('DJANGO_FERNET_KEY', default='DoDOnwOMoURGhGUfE87fgBEtXgLo6ObG84l_us9fGT4=').encode('utf-8')
 if isinstance(FERNET_KEY, str): FERNET_KEY = FERNET_KEY.encode('utf-8') # This ensures it becomes bytes
