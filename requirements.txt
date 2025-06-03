@@ -1,0 +1,7 @@
+django
+djangorestframework
+psycopg2-binary
+cryptography
+djangorestframework-simplejwt
+drf-spectacular
+django-filter

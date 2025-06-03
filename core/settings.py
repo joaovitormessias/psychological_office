@@ -1,3 +1,6 @@
+import os
+import sys
+from django.core.management.utils import get_random_secret_key
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -8,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6c3qtvm^p*2dp))u81ggkdi%hxt2k6%k9c#d#kcmbjo#x%2e^o'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -20,7 +23,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     # Administration interface
-    'jazzmin',
+    # 'jazzmin', # Temporarily commented out
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,6 +43,15 @@ INSTALLED_APPS = [
 
     # Registring the App
     'psychological_office',
+
+    # Core app for custom fields, etc.
+    'core',
+
+    # New apps from script
+    'pacientes.apps.PacientesConfig',
+    'agendamentos.apps.AgendamentosConfig',
+    'consultas.apps.ConsultasConfig',
+    'usuarios.apps.UsuariosConfig',
 ]
 
 MIDDLEWARE = [
@@ -75,12 +87,24 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Default to PostgreSQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'your_db_name'),
+        'USER': os.getenv('DB_USER', 'your_db_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'your_db_password'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
+# Use SQLite in-memory for tests
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
 
 
 # Password validation
@@ -102,7 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # This will tell Django to use the custom user model for authentication.
-AUTH_USER_MODEL = 'psychological_office.User'
+AUTH_USER_MODEL = 'usuarios.CustomUser'
 
 
 # Internationalization
@@ -127,14 +151,19 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configure the DEFAULT_AUTHENTICATION_CLASSES to use JWT:
-# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
+# Basic DRF settings from script
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    )
 }
+
+# Fernet key for encrypting consultation data
+# IMPORTANT: DJANGO_FERNET_KEY environment variable MUST be set in production.
+DEFAULT_FERNET_KEY_BYTES = 'DoDOnwOMoURGhGUfE87fgBEtXgLo6ObG84l_us9fGT4=' # generate_key() output is str
+FERNET_KEY = os.getenv('DJANGO_FERNET_KEY', DEFAULT_FERNET_KEY_BYTES)
+if isinstance(FERNET_KEY, str): FERNET_KEY = FERNET_KEY.encode('utf-8') # This ensures it becomes bytes

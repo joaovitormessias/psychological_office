@@ -16,6 +16,10 @@ router.register(r'appointments', views.AppointmentViewSet)
 router.register(r'consultations', views.ConsultationViewSet)
 
 urlpatterns = [
+    path('api/v1/usuarios/', include('usuarios.urls')),
+    path('api/v1/pacientes/', include('pacientes.urls')),
+    path('api/v1/agendamentos/', include('agendamentos.urls')),
+    path('api/v1/consultas/', include('consultas.urls')),
     path('admin/', admin.site.urls),
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
