@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('DJANGO_SECRET_KEY', default=get_random_secret_key())
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -44,8 +44,8 @@ INSTALLED_APPS = [
     # Documentation
     'drf_spectacular',
 
-    # Registring the App
-
+    # Conexao com front
+    'corsheaders',
 
     # Core app for custom fields, etc.
     'core',
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -183,3 +184,12 @@ REST_FRAMEWORK = {
 DEFAULT_FERNET_KEY_BYTES = 'DoDOnwOMoURGhGUfE87fgBEtXgLo6ObG84l_us9fGT4=' # generate_key() output is str
 FERNET_KEY = config('DJANGO_FERNET_KEY', default='DoDOnwOMoURGhGUfE87fgBEtXgLo6ObG84l_us9fGT4=').encode('utf-8')
 if isinstance(FERNET_KEY, str): FERNET_KEY = FERNET_KEY.encode('utf-8') # This ensures it becomes bytes
+
+# Frontend
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Frontend Vite React
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']

@@ -6,12 +6,12 @@ from .permissions import IsAdminUser # Import the custom permission
 class UserListView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser] # Use the custom admin role permission
+    permission_classes = [permissions.IsAuthenticated] # Use the custom admin role permission
 
 class UserDetailView(generics.RetrieveAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser] # Also protect detail view by Admin
+    permission_classes = [permissions.IsAuthenticated] # Also protect detail view by Admin
 
 class RegisterUserView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
