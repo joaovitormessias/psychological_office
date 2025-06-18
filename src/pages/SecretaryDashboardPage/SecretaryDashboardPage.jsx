@@ -1,0 +1,22 @@
+// src/pages/SecretaryDashboardPage/SecretaryDashboardPage.jsx
+import React from 'react';
+import useAuth from '../../hooks/useAuth';
+
+const SecretaryDashboardPage = () => {
+  const { user, logout } = useAuth();
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-bold text-blue-700 mb-4">Secretary Dashboard</h2>
+      <p className="text-lg">Welcome, {user?.name || 'Secretary'}!</p>
+      <p>This is your dedicated dashboard.</p>
+      {/* Add Secretary-specific components/links here */}
+      <button
+        onClick={logout}
+        className="mt-6 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      >
+        Logout
+      </button>
+    </div>
+  );
+};
+export default SecretaryDashboardPage;
