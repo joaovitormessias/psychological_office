@@ -1,12 +1,12 @@
 from rest_framework import viewsets, permissions
 from .models import Consulta
 from .serializers import ConsultaSerializer
-from usuarios.permissions import IsProfissionalSaude
+from usuarios.permissions import IsProfissionalSaude, IsSecretaria, IsAdminUser
 from usuarios.models import UserRole
 
 class ConsultaViewSet(viewsets.ModelViewSet):
     serializer_class = ConsultaSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProfissionalSaude]
+    permission_classes = [IsProfissionalSaude | IsSecretaria | IsAdminUser]
 
     def get_queryset(self):
         user = self.request.user
