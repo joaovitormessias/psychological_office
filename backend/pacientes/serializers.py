@@ -33,6 +33,9 @@ class PacienteSerializer(serializers.ModelSerializer):
     # cidade_choices = serializers.SerializerMethodField() # For UF-dependent city filtering
 
     # Audit fields are read-only by default, but let's be explicit
+    # NOTE: The frontend (PacienteForm.jsx) is currently sending a flat data structure for patient creation/update.
+    # This serializer expects nested objects for 'endereco_residencial' and 'endereco_cobranca'.
+    # This discrepancy will need to be resolved, likely by updating the frontend to send nested data.
     criado_por = serializers.PrimaryKeyRelatedField(read_only=True)
     modificado_por = serializers.PrimaryKeyRelatedField(read_only=True)
 
@@ -137,6 +140,12 @@ class PacienteSerializer(serializers.ModelSerializer):
 
             endereco_residencial_data = validated_data.pop('endereco_residencial', None)
             endereco_cobranca_data = validated_data.pop('endereco_cobranca', None)
+            # TODO: Clarify behavior for 'repetir_endereco_cobranca' on update.
+            # If 'repetir_endereco_cobranca' is not provided in the PATCH request, it defaults to False.
+            # This means if it was previously true (cobranca was same as residencial) and the flag is not sent again,
+            # the addresses might become unlinked or cobranca might be treated as a new, separate address if
+            # 'endereco_cobranca_data' is also absent or present.
+            # Consider if the existing link should be preserved if the flag isn't sent.
             repetir_endereco = validated_data.pop('repetir_endereco_cobranca', False) # Default to False on update unless specified
 
             # Update endereco_residencial

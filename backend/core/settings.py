@@ -190,6 +190,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Frontend Vite React
 ]
 
+# TODO: Clarify CORS configuration.
+# If CORS_ALLOW_ALL_ORIGINS is True, it effectively overrides the specific origins listed
+# in CORS_ALLOWED_ORIGINS, allowing requests from any origin.
+# For development, this might be acceptable, but for production,
+# CORS_ALLOW_ALL_ORIGINS should be False and CORS_ALLOWED_ORIGINS (or CORS_ALLOWED_ORIGIN_REGEXES)
+# should be set to the specific frontend domain(s).
+# If the intention is to only allow "http://localhost:5173", then set CORS_ALLOW_ALL_ORIGINS to False.
 CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']

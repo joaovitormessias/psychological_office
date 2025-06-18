@@ -5,3 +5,5 @@ cryptography
 djangorestframework-simplejwt
 drf-spectacular
 django-filter
+django-cors-headers
+python-decouple
