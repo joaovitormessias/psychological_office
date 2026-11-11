@@ -6,7 +6,7 @@ import api from "../services/api";
 export default function Consulta() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit } = useForm();
   const [dados, setDados] = useState({});
 
   const onSubmit = async (data) => {

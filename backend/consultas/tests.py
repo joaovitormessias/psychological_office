@@ -159,3 +159,14 @@ class ConsultaAPITests(APITestCase):
 
         self.agendamento2_curr.refresh_from_db()
         self.assertEqual(self.agendamento2_curr.status, AgendamentoStatus.CONCLUIDO)
+
+    def test_previous_notes_do_not_cross_professional_boundary(self):
+        self.client.force_authenticate(user=self.prof_user2)
+        response = self.client.post(self.consulta_url, {
+            'agendamento_id': self.agendamento3_other_prof.pk,
+            'anotacoes_atuais': 'Separate professional record',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertIsNone(response.data['anotacoes_anteriores'])
+        consultation = Consulta.objects.get(pk=response.data['id'])
+        self.assertIsNone(consultation.anotacoes_anteriores)

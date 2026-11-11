@@ -8,7 +8,7 @@ A full-stack prototype that models the workflow between reception staff and heal
 
 [Product workflow](#product-workflow) · [Code walkthrough](#code-walkthrough) · [Run locally](#run-locally) · [API example](#try-the-api) · [Tests](#testing) · [Current limitations](#current-limitations)
 
-> **Project status:** development prototype for portfolio review. The browser workflow has known integration blockers. Use the API as the starting point for evaluation, with synthetic data only. No hosted demo or production-readiness claim is provided.
+> **Project status:** development prototype for portfolio review. The browser workflow still needs end-to-end validation. Use the API as the starting point for evaluation, with synthetic data only. No hosted demo or production-readiness claim is provided.
 
 ## Product workflow
 
@@ -29,11 +29,11 @@ The code and API use Portuguese domain names; this documentation uses English de
 
 | API role | Intended workflow and current behavior |
 | --- | --- |
-| `SECRETARIA` | Reception: patient records and appointments. Consultation listing returns an empty queryset. |
+| `SECRETARIA` | Reception: patient records and appointments. Consultation access is denied (HTTP 403). |
 | `PROFISSIONAL_SAUDE` | Patient records, appointments, and consultations. Consultation queries are filtered to the responsible professional. |
 | `ADMIN` | Administrative role. It does not automatically bypass the patient/appointment role checks. |
 
-These are application roles, separate from Django's `is_staff` and `is_superuser` flags. User-management permissions and historical-note access still need review; see the limitations below.
+These are application roles, separate from Django's `is_staff` and `is_superuser` flags. User registration and user-management endpoints require `ADMIN`; `/api/usuarios/me/` returns the authenticated account. Historical consultation notes are restricted to the same responsible professional.
 
 ## Code walkthrough
 
@@ -47,7 +47,7 @@ For a technical review, these are useful entry points:
 | Encrypted persistence | [EncryptedTextField](backend/core/fields.py) | Encrypts text on persistence and decrypts when loading it; this is not end-to-end encryption |
 | Change attribution | [Patient views](backend/pacientes/views.py) and serializers | Records creation/update users and timestamps, not a complete audit history |
 | API documentation | [URL configuration](backend/core/urls.py) | Exposes an OpenAPI schema and Swagger UI |
-| Automated verification | [Patient](backend/pacientes/tests.py), [appointment](backend/agendamentos/tests.py), [consultation](backend/consultas/tests.py), and [user](backend/usuarios/tests.py) tests | Exercises domain behavior and access scenarios; passing status is not claimed |
+| Automated verification | [Patient](backend/pacientes/tests.py), [appointment](backend/agendamentos/tests.py), [consultation](backend/consultas/tests.py), and [user](backend/usuarios/tests.py) tests | Exercises domain behavior and access scenarios; 30 tests pass with isolated SQLite settings |
 
 ### Architecture
 
@@ -96,12 +96,11 @@ cd psychological_office/backend
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-python -m pip install python-decouple django-cors-headers
 ```
 
 On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`.
 
-The extra installation command is necessary because settings import `decouple` and enable `corsheaders`, but the current requirements file omits their packages.
+The requirements include `python-decouple` and `django-cors-headers`, which settings import.
 
 ### 2. Configure the environment
 
@@ -154,7 +153,7 @@ npm ci
 npm run dev
 ```
 
-The Axios client points to `http://localhost:8000/api`. The intended Vite URL is http://localhost:5173. The current router/authentication wiring prevents a reliable browser demo; starting the dev server does not mean the product flow works. See [current limitations](#current-limitations).
+The Axios client points to `http://localhost:8000/api`. The intended Vite URL is http://localhost:5173. The router now wraps the authentication provider, current-user lookup uses `/usuarios/me/`, and the patient form includes the required address. The frontend production build passes; the complete browser journey still needs validation.
 
 ## Try the API
 
@@ -218,7 +217,7 @@ cd backend
 python manage.py test usuarios pacientes agendamentos consultas
 ```
 
-Django creates a separate test database; the configured PostgreSQL user needs permission to create it. The SQLite test override in settings is commented out.
+Django creates a separate test database; the configured PostgreSQL user needs permission to create it. For isolated domain tests without PostgreSQL, use `python manage.py test usuarios pacientes agendamentos consultas --settings=core.test_settings`. This dedicated configuration uses an in-memory SQLite database and test-only keys/password hashing; never use it to serve the application.
 
 Frontend checks:
 
@@ -230,24 +229,24 @@ npm run lint
 
 There is no frontend test script in `package.json`. A successful production build alone would not verify authentication or the complete user journey.
 
-**Verification status:** source review only for this documentation update; no runtime test results or coverage percentage are claimed. Existing permission tests and views disagree in places, including user listing and reception access to consultation lists.
+**Verification status:** 30 backend tests passed with Python 3.12, Django 5.2.8 and isolated SQLite settings; the frontend production build and lint passed. Lint retains six React Hooks/Fast Refresh warnings. PostgreSQL-specific behavior and browser end-to-end flows are not claimed as verified. No coverage percentage is claimed.
 
 ## Current limitations
 
 This project demonstrates backend implementation work, but several items remain before a dependable product demonstration:
 
-- **Frontend integration:** `AuthProvider` calls `useNavigate` while mounted outside `BrowserRouter`. It also identifies the current user using the first element of the user list. Patient creation omits the residential-address object required by the API.
-- **Authorization:** registration is public, and user listing/detail require authentication without enforcing the custom admin permission. Historical consultation notes are selected by patient and date without filtering by responsible professional. Those paths need explicit access-policy review and tests.
+- **Browser verification:** corrected authentication wiring, current-user lookup and nested address payloads still need a full browser acceptance test, including token expiry.
+- **Access policy scope:** registration/user management are admin-only; consultation history follows professional ownership. Shared clinical records would require a separate explicit policy, not broader queries.
 - **Development security settings:** debug mode and permissive CORS are enabled; a public fallback encryption key exists; access tokens last seven days and are stored in browser local storage. This configuration is not suitable for real patient data.
 - **Validation and scheduling:** CPF/CEP validation is permissive, address lookup contains mock behavior, and appointments have no duration or per-professional calendar.
-- **Reproducibility:** backend dependencies are unpinned and two required packages are absent from `requirements.txt`. Runtime checks, dependency compatibility, and deployment remain to be validated.
+- **Reproducibility:** backend dependencies are unpinned. The isolated test environment does not replace a PostgreSQL deployment check.
 
 ### Next milestones
 
-1. Repair router/authentication integration and align patient forms with the API.
-2. Define and test registration, user-management, and historical-note access policies.
-3. Make dependencies reproducible and reconcile tests with the intended permissions.
-4. Add a synthetic-data demo, real screenshots, and continuous integration after the workflow is verified.
+1. Validate the complete browser workflow with synthetic data and expired tokens.
+2. Harden secrets, CORS and token lifetime before any real patient data.
+3. Pin dependencies and add PostgreSQL integration checks.
+4. Publish real demo screenshots and continuous integration after acceptance testing.
 
 ## Maintainer
 

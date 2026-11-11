@@ -29,6 +29,7 @@ class UserAuthTests(APITestCase):
             "email": "newuser@example.com",
             "role": UserRole.SECRETARIA
         }
+        self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(self.register_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(CustomUser.objects.filter(username="newuser").exists())
@@ -44,6 +45,7 @@ class UserAuthTests(APITestCase):
             "email": "another@example.com",
             "role": UserRole.PROFISSIONAL_SAUDE
         }
+        self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(self.register_url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("password", response.data)
@@ -58,7 +60,7 @@ class UserAuthTests(APITestCase):
         # If default is IsAuthenticated, this should be 403.
         # If default is AllowAny (unlikely for list view), this would be 200.
         # Given the script context, assuming it's protected.
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) # Or 401 if no auth at all
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_users_as_admin(self):
         self.client.force_authenticate(user=self.admin_user)
@@ -93,3 +95,12 @@ class UserAuthTests(APITestCase):
         self.assertFalse(IsProfissionalSaude().has_permission(request_secretaria, None))
         self.assertTrue(IsAdminUser().has_permission(request_admin, None))
         self.assertFalse(IsAdminUser().has_permission(request_secretaria, None))
+
+    def test_current_user_is_authenticated_identity(self):
+        self.client.force_authenticate(user=self.profissional_user)
+        response = self.client.get(reverse('user-me'))
+        self.assertEqual(response.data['id'], self.profissional_user.pk)
+
+    def test_registration_requires_admin(self):
+        self.client.force_authenticate(user=self.secretaria_user)
+        self.assertEqual(self.client.post(self.register_url, {}).status_code, 403)

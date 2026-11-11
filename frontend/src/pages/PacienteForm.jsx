@@ -45,6 +45,9 @@ export default function PacienteForm() {
         <input {...register("celular")} placeholder="Celular" className="input input-bordered w-full" required />
         <input {...register("whatsapp")} placeholder="WhatsApp" className="input input-bordered w-full" />
         <input {...register("email")} placeholder="Email" className="input input-bordered w-full" required />
+        {['cep', 'uf', 'cidade', 'logradouro', 'numero', 'bairro'].map(field => (
+          <input key={field} {...register(`endereco_residencial.${field}`)} placeholder={field} className="input input-bordered w-full" required />
+        ))}
         <button className="btn btn-primary w-full">Salvar</button>
       </form>
     </div>
