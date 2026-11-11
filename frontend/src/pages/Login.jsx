@@ -14,7 +14,7 @@ export default function Login() {
       setError("");
       await login(data.username, data.password);
       navigate("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Usuário ou senha inválidos.");
     }
   };

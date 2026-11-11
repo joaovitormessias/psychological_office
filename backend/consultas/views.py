@@ -6,7 +6,7 @@ from usuarios.models import UserRole
 
 class ConsultaViewSet(viewsets.ModelViewSet):
     serializer_class = ConsultaSerializer
-    permission_classes = [IsProfissionalSaude | IsSecretaria | IsAdminUser]
+    permission_classes = [IsProfissionalSaude]
 
     def get_queryset(self):
         user = self.request.user

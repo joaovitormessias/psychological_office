@@ -12,8 +12,8 @@ import Consulta from "../pages/Consulta";
 
 export default function AppRouter() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={<Login />} />
 
@@ -82,7 +82,7 @@ export default function AppRouter() {
             }
           />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

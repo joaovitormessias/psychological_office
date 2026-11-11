@@ -22,8 +22,8 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await api.get("/usuarios/");
-      setUser(res.data[0]); // Você pode ajustar isso
+      const res = await api.get("/usuarios/me/");
+      setUser(res.data); // The backend supplies the signed-in identity.
     } catch (error) {
       console.log(error);
       logout();

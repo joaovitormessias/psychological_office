@@ -58,6 +58,8 @@ class ConsultaSerializer(serializers.ModelSerializer):
 
     def _get_previous_consultation_notes(self, paciente, current_agendamento_date):
         previous_consulta = Consulta.objects.filter(
+            # Historical notes must follow the same ownership boundary as current notes.
+            profissional_responsavel=self._get_request_user(),
             agendamento__paciente=paciente,
             agendamento__data__lt=current_agendamento_date,
         ).order_by('-agendamento__data', '-agendamento__hora').first()
